@@ -10,6 +10,7 @@ const RacingScreen = ({ carNames, raceHistory, randomNumbers, onComplete }) => {
   );
   const [displayedRandoms, setDisplayedRandoms] = useState({});
   const [showRandoms, setShowRandoms] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
     if (currentRound >= raceHistory.length) {
@@ -26,18 +27,25 @@ const RacingScreen = ({ carNames, raceHistory, randomNumbers, onComplete }) => {
       if (randomNumbers && randomNumbers[currentRound]) {
         setDisplayedRandoms(randomNumbers[currentRound]);
         setShowRandoms(true);
+        setIsExiting(false);
         
-        // 0.4초 후 위치 업데이트
+        // 0.5초 후 주사위 퇴장 애니메이션 시작
+        setTimeout(() => {
+          setIsExiting(true);
+        }, 500);
+        
+        // 0.7초 후 위치 업데이트 및 주사위 숨김
         setTimeout(() => {
           setDisplayedPositions(raceHistory[currentRound]);
           setShowRandoms(false);
-        }, 400);
+          setIsExiting(false);
+        }, 700);
       } else {
         setDisplayedPositions(raceHistory[currentRound]);
       }
       
       setCurrentRound(prev => prev + 1);
-    }, 1000);
+    }, 1200);
 
     return () => clearTimeout(timer);
   }, [currentRound, raceHistory, randomNumbers, onComplete]);
@@ -64,7 +72,9 @@ const RacingScreen = ({ carNames, raceHistory, randomNumbers, onComplete }) => {
                   
                   {/* 랜덤 숫자 표시 */}
                   {showRandoms && randomNum !== undefined && (
-                    <div className={`mr-3 px-3 py-1 rounded-full font-bold text-sm animate-bounce ${
+                    <div className={`mr-3 px-3 py-1 rounded-full font-bold text-sm ${
+                      isExiting ? 'animate-dice-exit' : 'animate-dice-roll'
+                    } ${
                       isMoved 
                         ? 'bg-green-100 text-green-700 border-2 border-green-400' 
                         : 'bg-red-100 text-red-700 border-2 border-red-400'
