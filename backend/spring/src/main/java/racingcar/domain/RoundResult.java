@@ -6,6 +6,7 @@ public class RoundResult {
     private final int currentPosition;
     private final int randomNumber;
 
+
     public RoundResult(String carName, int currentPosition, int randomNumber) {
         this.carName = carName;
         this.currentPosition = currentPosition;
