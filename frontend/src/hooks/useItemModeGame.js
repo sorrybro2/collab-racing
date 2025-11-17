@@ -6,7 +6,7 @@ import { validateItemModeInput } from '../utils/itemModeValidator';
  * 아이템 모드 게임 로직을 관리하는 커스텀 훅
  */
 export const useItemModeGame = () => {
-  const [gameState, setGameState] = useState('input'); // 'input', 'racing', 'result'
+  const [gameState, setGameState] = useState('input'); // 'input', 'racing', 'result', 'history'
   const [carNames, setCarNames] = useState([]);
   const [targetDistance, setTargetDistance] = useState(0);
   const [raceHistory, setRaceHistory] = useState([]); // 각 라운드별 위치
@@ -83,6 +83,13 @@ export const useItemModeGame = () => {
     setError(null);
   };
 
+  /**
+   * 역대 우승자 화면으로 이동
+   */
+  const showHistory = () => {
+    setGameState('history');
+  };
+
   return {
     gameState,
     carNames,
@@ -97,6 +104,7 @@ export const useItemModeGame = () => {
     startGame,
     resetGame,
     showResult,
+    showHistory,
     backToInput,
   };
 };
