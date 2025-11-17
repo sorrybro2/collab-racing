@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRacingGame } from './hooks/useRacingGame';
 import ModeSelectionScreen from './components/ModeSelectionScreen';
+import ItemModeComingSoon from './components/ItemModeComingSoon';
 import InputForm from './components/InputForm';
 import RacingScreen from './components/RacingScreen';
 import ResultScreen from './components/ResultScreen';
@@ -34,6 +35,13 @@ function App() {
   };
 
   /**
+   * 모드 선택 화면으로 돌아가기
+   */
+  const handleBackToModeSelection = () => {
+    setSelectedMode(null);
+  };
+
+  /**
    * 게임 리셋 시 모드도 초기화
    */
   const handleResetGame = () => {
@@ -48,13 +56,19 @@ function App() {
         <ModeSelectionScreen onSelectMode={handleSelectMode} />
       )}
 
-      {/* 입력 화면 (모드 선택 후) */}
-      {gameState === 'input' && selectedMode && (
+      {/* 클래식 모드 - 입력 화면 */}
+      {gameState === 'input' && selectedMode === 'classic' && (
         <InputForm 
           onStartGame={startGame}
           onShowHistory={showHistory}
+          onBack={handleBackToModeSelection}
           error={error}
         />
+      )}
+
+      {/* 아이템 모드 - 커밍순 화면 */}
+      {gameState === 'input' && selectedMode === 'item' && (
+        <ItemModeComingSoon onBack={handleBackToModeSelection} />
       )}
 
       {gameState === 'racing' && (
