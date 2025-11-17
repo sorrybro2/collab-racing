@@ -3,7 +3,7 @@
  * 백엔드 API와 통신하는 함수들
  */
 
-const API_BASE_URL = 'http://localhost:8080/api/racing';
+const API_BASE_URL = '/api/racing';
 
 // 개발 모드 플래그 (백엔드 없이 테스트할 때 true로 설정)
 const USE_MOCK_DATA = false; // 백엔드 준비되면 false로 변경

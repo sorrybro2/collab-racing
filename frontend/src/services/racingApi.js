@@ -2,7 +2,7 @@
  * 백엔드 API와 통신하는 서비스 레이어
  */
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = '/api/racing';
 const USE_MOCK = false; // 백엔드 없이 테스트할 때 true, 실제 API 사용시 false
 
 /**
@@ -81,7 +81,7 @@ export const startRacing = async (carNames, roundCount) => {
   
   // 실제 API 호출
   try {
-    const response = await fetch(`${API_BASE_URL}/racing/classic`, {
+    const response = await fetch(`${API_BASE_URL}/classic`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -144,7 +144,7 @@ export const getRacingStatus = async (gameId) => {
  */
 export const getWinnersHistory = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/racing/classic/winners`);
+    const response = await fetch(`${API_BASE_URL}/classic/winners`);
     
     if (!response.ok) {
       throw new Error('역대 우승자 조회에 실패했습니다.');
