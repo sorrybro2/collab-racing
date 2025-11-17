@@ -22,10 +22,6 @@ function ItemModeComingSoon({ onBack }) {
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
               아이템 모드
             </h1>
-            
-            <div className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full text-lg font-semibold mb-8">
-              Coming Soon
-            </div>
 
             <p className="text-gray-600 text-lg leading-relaxed mb-8">
               더욱 재미있는 레이싱 게임을 위해<br />

@@ -73,9 +73,6 @@ function ModeSelectionScreen({ onSelectMode }) {
               <br />
               전략적인 플레이를 즐겨보세요.
             </p>
-            <span className="inline-block mt-3 text-sm text-indigo-600 font-semibold">
-              Coming Soon
-            </span>
           </button>
         </div>
       </div>
