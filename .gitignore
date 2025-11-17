@@ -1,0 +1,48 @@
+# ============================================
+# 프로젝트 루트 .gitignore
+# ============================================
+
+# 빌드 아티팩트
+backend/spring/build/
+backend/spring/src/main/resources/static/
+frontend/dist/
+out/
+
+# 중복 폴더 (삭제 예정)
+backend/spring/frontend/
+
+# 의존성
+node_modules/
+frontend/node_modules/
+backend/spring/frontend/node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+Thumbs.db
+
+# 로그
+*.log
+logs/
+
+# 환경 설정
+*.local
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Gradle
+.gradle/
+backend/spring/.gradle/
+
+# 기타
+package-lock.json
+
+
