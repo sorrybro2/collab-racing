@@ -54,14 +54,14 @@ class RacingGameServiceTest {
 
     @Test
     @DisplayName("시도 횟수만큼 경주를 진행하고 결과를 반환한다")
-    void playRace_returnsRaceResult() {
+    void playRace_returnsClassicRaceResult() {
         // given
         Cars cars = new Cars("pobi,woni");
         racingGameService.saveCars(cars);
         AttemptsCount attemptsCount = new AttemptsCount(3);
 
         // when
-        RaceResultDto result = racingGameService.playRace(attemptsCount);
+        RaceResultDto result = racingGameService.playClassicRace(attemptsCount);
 
         // then
         assertThat(result.getRaceProgress()).hasSize(3);
