@@ -102,4 +102,23 @@ export const getRacingStatus = async (gameId) => {
   }
 };
 
+/**
+ * 역대 우승자 목록 조회
+ * @returns {Promise<Array<Array<string>>>} 역대 우승자 목록 (예: [["pobi", "woni"], ["jun"]])
+ */
+export const getWinnersHistory = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/winners`);
+    
+    if (!response.ok) {
+      throw new Error('역대 우승자 조회에 실패했습니다.');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Winners History API Error:', error);
+    throw error;
+  }
+};
+
 

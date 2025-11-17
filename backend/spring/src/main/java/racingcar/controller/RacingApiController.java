@@ -13,15 +13,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RestController
-@RequestMapping("/api")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"}) // React 개발 서버
-public class RacingApiController {
+// 중복 컨트롤러 - RacingGameApiController를 사용하므로 비활성화
+//@RestController
+//@RequestMapping("/api")
+//@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"}) // React 개발 서버
+class RacingApiController_DISABLED {
 
     private final RacingGameService racingGameService;
 
     @Autowired
-    public RacingApiController(RacingGameService racingGameService) {
+    public RacingApiController_DISABLED(RacingGameService racingGameService) {
         this.racingGameService = racingGameService;
     }
 
