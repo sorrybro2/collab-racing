@@ -3,7 +3,29 @@
  */
 
 const API_BASE_URL = '/api';
-const USE_MOCK = false; // 백엔드 없이 테스트할 때 true, 실제 API 사용시 false 
+const USE_MOCK = false; // 백엔드 없이 테스트할 때 true, 실제 API 사용시 false
+
+/**
+ * 백엔드 응답을 프론트엔드 형식으로 변환
+ * @param {Array<Array<Object>>} backendData - [[{"pobi": 5}, {"crong": 3}], ...]
+ * @param {string[]} carNames - 자동차 이름 배열
+ * @returns {Object} { positions: {...}, array: [...] }
+ */
+const convertBackendResponse = (backendData, carNames) => {
+  if (!backendData || backendData.length === 0) {
+    const initial = {};
+    carNames.forEach(name => initial[name] = 0);
+    return [initial];
+  }
+  
+  return backendData.map(roundData => {
+    const positions = {};
+    carNames.forEach(name => {
+      positions[name] = roundData.find(obj => obj[name] !== undefined)?.[name] || 0;
+    });
+    return positions;
+  });
+}; 
 /**
  * Mock 데이터 생성 (테스트용)
  */
@@ -59,7 +81,7 @@ export const startRacing = async (carNames, roundCount) => {
   
   // 실제 API 호출
   try {
-    const response = await fetch(`${API_BASE_URL}/racing/start`, {
+    const response = await fetch(`${API_BASE_URL}/racing/classic`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -75,7 +97,21 @@ export const startRacing = async (carNames, roundCount) => {
       throw new Error(errorData.message || '게임 시작에 실패했습니다.');
     }
 
-    return await response.json();
+    const data = await response.json();
+    
+    // 백엔드 응답 형식:
+    // {
+    //   raceHistory: [[{"pobi": 0}, {"crong": 0}], [{"pobi": 1}, {"crong": 0}], ...],
+    //   randomNumbers: [[{"pobi": 5}, {"crong": 3}], ...],
+    //   winners: ['pobi']
+    // }
+    
+    // 프론트엔드 형식으로 변환
+    return {
+      raceHistory: convertBackendResponse(data.raceHistory, carNames),
+      randomNumbers: convertBackendResponse(data.randomNumbers, carNames),
+      winners: data.winners || []
+    };
   } catch (error) {
     console.error('Racing API Error:', error);
     throw error;
@@ -108,7 +144,7 @@ export const getRacingStatus = async (gameId) => {
  */
 export const getWinnersHistory = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/winners`);
+    const response = await fetch(`${API_BASE_URL}/racing/classic/winners`);
     
     if (!response.ok) {
       throw new Error('역대 우승자 조회에 실패했습니다.');
