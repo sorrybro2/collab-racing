@@ -3,7 +3,7 @@ import { useItemModeGame } from '../hooks/useItemModeGame';
 import ItemModeInputForm from '../components/ItemModeInputForm';
 import ItemModeRacingScreen from '../components/ItemModeRacingScreen';
 import ItemModeResultScreen from '../components/ItemModeResultScreen';
-import WinnersHistoryScreen from '../components/WinnersHistoryScreen';
+import ItemModeWinnersHistoryScreen from '../components/ItemModeWinnersHistoryScreen';
 
 /**
  * 아이템 모드 페이지
@@ -61,8 +61,8 @@ function ItemModePage() {
   return (
     <Routes>
       {/* 아이템 모드 - 입력 화면 */}
-      <Route 
-        path="/" 
+      <Route
+        path="/"
         element={
           <ItemModeInputForm
             onStartGame={handleStartGame}
@@ -70,12 +70,12 @@ function ItemModePage() {
             onBack={handleBackToModeSelection}
             error={itemMode.error}
           />
-        } 
+        }
       />
 
       {/* 아이템 모드 - 레이싱 화면 */}
-      <Route 
-        path="/race" 
+      <Route
+        path="/race"
         element={
           itemMode.carNames.length > 0 ? (
             <ItemModeRacingScreen
@@ -88,12 +88,12 @@ function ItemModePage() {
           ) : (
             <Navigate to="/item" replace />
           )
-        } 
+        }
       />
 
       {/* 아이템 모드 - 결과 화면 */}
-      <Route 
-        path="/result" 
+      <Route
+        path="/result"
         element={
           itemMode.winners.length > 0 ? (
             <ItemModeResultScreen
@@ -108,14 +108,14 @@ function ItemModePage() {
           ) : (
             <Navigate to="/item" replace />
           )
-        } 
+        }
       />
 
       {/* 아이템 모드 - 역대 우승자 */}
-      <Route 
-        path="/history" 
+      <Route
+        path="/history"
         element={
-          <WinnersHistoryScreen
+          <ItemModeWinnersHistoryScreen
             onBack={handleBackFromHistory}
           />
         } 
