@@ -35,6 +35,9 @@ public class Car {
 
     public void itemMove(int itemEffect) {
         position += itemEffect;
+        if (position < 0) {
+            position = 0;
+        }
     }
 
     private boolean isMoving(int randomNumber) {

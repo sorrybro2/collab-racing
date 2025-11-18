@@ -3,7 +3,7 @@ import { useState } from 'react';
 /**
  * 자동차 이름과 시도 횟수를 입력받는 폼 컴포넌트
  */
-const InputForm = ({ onStartGame, error }) => {
+const InputForm = ({ onStartGame, onShowHistory, onBack, error }) => {
   const [carNamesInput, setCarNamesInput] = useState('');
   const [roundCountInput, setRoundCountInput] = useState('');
 
@@ -16,9 +16,18 @@ const InputForm = ({ onStartGame, error }) => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+        {/* 뒤로가기 버튼 */}
+        <button
+          onClick={onBack}
+          className="mb-4 flex items-center text-gray-600 hover:text-gray-800 transition"
+        >
+          <span className="text-xl mr-2">←</span>
+          <span className="text-sm font-medium">모드 선택으로 돌아가기</span>
+        </button>
+
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">🚗 자동차 경주</h1>
-          <p className="text-gray-600">우아한테크코스 레이싱 게임</p>
+          <p className="text-gray-600">클래식 모드</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -74,6 +83,14 @@ const InputForm = ({ onStartGame, error }) => {
             className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition duration-200 shadow-lg"
           >
             🏁 경주 시작
+          </button>
+
+          <button
+            type="button"
+            onClick={onShowHistory}
+            className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold py-3 px-4 rounded-lg hover:from-yellow-600 hover:to-orange-700 transform hover:scale-105 transition duration-200 shadow-lg"
+          >
+            🏆 역대 우승자 보기
           </button>
         </form>
 

@@ -3,10 +3,10 @@
  * 백엔드 API와 통신하는 함수들
  */
 
-const API_BASE_URL = 'http://localhost:8080/api/item-mode';
+const API_BASE_URL = '/api/racing';
 
 // 개발 모드 플래그 (백엔드 없이 테스트할 때 true로 설정)
-const USE_MOCK_DATA = true; // 백엔드 준비되면 false로 변경
+const USE_MOCK_DATA = false; // 백엔드 준비되면 false로 변경
 
 // 아이템 목록
 const ITEMS = [
@@ -23,6 +23,51 @@ const ITEMS = [
   { id: 'TIRE_BOMB', name: '타이어 폭탄', icon: '💣', effect: -3,
     messages: ['타이어 BOMB', '리버스 임펙트~', '뒤로뒤로 열매'] }
 ];
+
+/**
+ * 백엔드 randomNumbers를 itemHistory로 변환
+ * @param {Array<Array<Object>>} randomNumbers - [[{"pobi": 2}, {"crong": 4}], ...]
+ * @param {string[]} carNames - 자동차 이름 배열
+ * @returns {Array<Array<Object>>} itemHistory
+ */
+const convertRandomNumbersToItemHistory = (randomNumbers, carNames) => {
+  if (!randomNumbers || randomNumbers.length === 0) return [];
+  
+  return randomNumbers.map(roundData => {
+    return carNames.map(carName => {
+      // roundData에서 해당 차량의 아이템 번호 찾기
+      const itemNumber = roundData.find(obj => obj[carName] !== undefined)?.[carName] || 0;
+      const item = ITEMS[itemNumber];
+      const randomMessage = item.messages[Math.floor(Math.random() * item.messages.length)];
+      
+      return {
+        carName,
+        id: item.id,
+        name: item.name,
+        icon: item.icon,
+        effect: item.effect,
+        message: randomMessage
+      };
+    });
+  });
+};
+
+/**
+ * 백엔드 raceHistory를 배열 형식으로 변환
+ * @param {Array<Array<Object>>} raceHistory - [[{"pobi": 0}, {"crong": 0}], ...]
+ * @param {string[]} carNames - 자동차 이름 배열
+ * @returns {Array<Array<number>>} [[0, 0], [3, 2], ...]
+ */
+const convertRaceHistoryToArray = (raceHistory, carNames) => {
+  if (!raceHistory || raceHistory.length === 0) return [carNames.map(() => 0)];
+  
+  return raceHistory.map(roundData => {
+    return carNames.map(carName => {
+      // roundData에서 해당 차량의 위치 찾기
+      return roundData.find(obj => obj[carName] !== undefined)?.[carName] || 0;
+    });
+  });
+};
 
 /**
  * Mock 데이터 생성 (백엔드 없이 테스트용)
@@ -98,7 +143,7 @@ export const startItemModeRacing = async (carNames, targetDistance) => {
     return generateMockRaceData(carNames, targetDistance);
   }
   try {
-    const response = await fetch(`${API_BASE_URL}/race`, {
+    const response = await fetch(`${API_BASE_URL}/item`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -106,7 +151,7 @@ export const startItemModeRacing = async (carNames, targetDistance) => {
       credentials: 'include',
       body: JSON.stringify({
         carNames,
-        targetDistance: Number(targetDistance)
+        roundCount: Number(targetDistance)
       })
     });
 
@@ -119,17 +164,27 @@ export const startItemModeRacing = async (carNames, targetDistance) => {
     
     // 백엔드 응답 형식:
     // {
-    //   raceHistory: [[0,0,0], [1,2,1], [4,5,2], ...],  // 각 라운드별 위치
-    //   itemHistory: [                                   // 각 라운드별 아이템
-    //     { id: 'BOOSTER', name: '부스터', icon: '🚀', effect: 3, message: '부아앙! 부스터 발동!' },
-    //     ...
-    //   ],
-    //   winners: ['pobi'],                               // 우승자 배열
-    //   totalRounds: 12,                                 // 총 라운드 수
-    //   finalPositions: [30, 28, 25]                    // 최종 위치
+    //   raceHistory: [[{"pobi": 0}, {"crong": 0}], ...],
+    //   randomNumbers: [[{"pobi": 2}, {"crong": 4}], ...],  // 아이템 번호 (0-5)
+    //   winners: ['pobi']
     // }
     
-    return data;
+    // randomNumbers를 itemHistory로 변환
+    const itemHistory = convertRandomNumbersToItemHistory(data.randomNumbers, carNames);
+    
+    // raceHistory를 배열 형식으로 변환
+    const raceHistory = convertRaceHistoryToArray(data.raceHistory, carNames);
+    
+    // 최종 위치 계산
+    const finalPositions = raceHistory[raceHistory.length - 1];
+    
+    return {
+      raceHistory,
+      itemHistory,
+      winners: data.winners,
+      totalRounds: raceHistory.length - 1,
+      finalPositions
+    };
   } catch (error) {
     console.error('아이템 모드 레이싱 API 오류:', error);
     throw error;
@@ -142,7 +197,7 @@ export const startItemModeRacing = async (carNames, targetDistance) => {
  */
 export const getItemModeWinners = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/winners`, {
+    const response = await fetch(`${API_BASE_URL}/item/winners`, {
       method: 'GET',
       credentials: 'include',
     });
