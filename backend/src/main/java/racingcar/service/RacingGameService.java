@@ -67,11 +67,12 @@ public class RacingGameService {
         RandomItemGenerator randomItemGenerator = new RandomItemGenerator();
 
         boolean goalReached = false;
+        int countRounds = 0;
+        int maxRounds = goalDistance.getGoalDistance() * 2;
         List<Car> cars = findCars();
 
-        while (!goalReached) {
+        while (!goalReached && countRounds < maxRounds) {
             List<RoundResult> roundResults = new ArrayList<>();
-            List<ItemResult> roundItems = new ArrayList<>();
 
             for (Car car : cars) {
                 int randomItemNumber = randomItemGenerator.generate();
@@ -82,6 +83,7 @@ public class RacingGameService {
             raceProgress.add(roundResults);
 
             goalReached = cars.stream().anyMatch(car -> car.getPosition() >= goalDistance.getGoalDistance());
+            countRounds++;
         }
 
         return new RaceResultDto(raceProgress, findWinners(goalDistance.getGoalDistance()));

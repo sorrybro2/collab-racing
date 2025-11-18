@@ -1,87 +1,122 @@
-package racingcar.controller;
+package racingcar.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import racingcar.domain.AttemptsCount;
-import racingcar.domain.Cars;
-import racingcar.domain.GoalDistance;
+import racingcar.domain.*;
+import racingcar.domain.random.CarRandomMoveGenerator;
+import racingcar.domain.random.RandomItemGenerator;
+import racingcar.dto.CarNamesDto;
 import racingcar.dto.RaceResultDto;
-import racingcar.dto.RacingRequest;
-import racingcar.mapper.RaceResultMapper;
-import racingcar.service.RacingGameService;
+import racingcar.repository.SpringDataJpaCarRepository;
+import racingcar.repository.SpringDataJpaClassicWinnerRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import racingcar.repository.SpringDataJpaItemWinnerRepository;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-@RestController
-@RequestMapping("/api/racing")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
-public class RacingGameApiController {
+@Transactional
+public class RacingGameService {
 
-    private final RacingGameService racingGameService;
-    private final RaceResultMapper raceResultMapper;
+    private final SpringDataJpaCarRepository springDataJpaCarRepository;
+    private final SpringDataJpaClassicWinnerRepository springDataJpaClassicWinnerRepository;
+    private final SpringDataJpaItemWinnerRepository springDataJpaItemWinnerRepository;
 
     @Autowired
-    public RacingGameApiController(RacingGameService racingGameService, RaceResultMapper raceResultMapper) {
-        this.racingGameService = racingGameService;
-        this.raceResultMapper = raceResultMapper;
+    public RacingGameService(SpringDataJpaCarRepository springDataJpaCarRepository, SpringDataJpaClassicWinnerRepository springDataJpaClassicWinnerRepository, SpringDataJpaItemWinnerRepository springDataJpaItemWinnerRepository) {
+        this.springDataJpaCarRepository = springDataJpaCarRepository;
+        this.springDataJpaClassicWinnerRepository = springDataJpaClassicWinnerRepository;
+        this.springDataJpaItemWinnerRepository = springDataJpaItemWinnerRepository;
     }
 
-    @PostMapping("/classic")
-    public ResponseEntity<?> startRacing(@RequestBody RacingRequest request) {
-        try {
-            String carNamesStr = String.join(",", request.getCarNames());
-            Cars cars = new Cars(carNamesStr);
-            racingGameService.saveCars(cars);
-
-            AttemptsCount attemptsCount = new AttemptsCount(request.getRoundCount());
-            RaceResultDto raceResultDto = racingGameService.playClassicRace(attemptsCount);
-
-            racingGameService.saveClassicWinners(raceResultDto.getWinners());
-
-            List<Map<String, Integer>> raceHistory = raceResultMapper.toRaceHistory(raceResultDto.getRaceProgress());
-            List<Map<String, Integer>> randomNumbers = raceResultMapper.toRaceHistory(raceResultDto.getRaceProgress());
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("raceHistory", raceHistory);
-            response.put("randomNumbers", randomNumbers);
-            response.put("winners", raceResultDto.getWinners());
-
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(error);
-        }
+    public void saveCars(Cars cars) {
+        springDataJpaCarRepository.deleteAll();
+        springDataJpaCarRepository.saveAll(cars.getCars());
     }
 
-    @PostMapping("/item")
-    public ResponseEntity<?> itemMode(@RequestBody RacingRequest request) {
-        try {
-            String carNamesStr = String.join(",", request.getCarNames());
-            Cars cars = new Cars(carNamesStr);
-            racingGameService.saveCars(cars);
+    public void saveClassicWinners(List<String> winners) {
+        springDataJpaClassicWinnerRepository.save(new ClassicWinners(winners));
+    }
 
-            GoalDistance goalDistance = new GoalDistance(request.getRoundCount());
-            RaceResultDto itemRaceResultDto = racingGameService.playItemRace(goalDistance);
+    public void saveItemWinners(List<String> winners) {
+        springDataJpaItemWinnerRepository.save(new ItemWinners(winners));
+    }
 
-            racingGameService.saveItemWinners(itemRaceResultDto.getWinners());
+    public RaceResultDto playClassicRace(AttemptsCount attemptsCount) {
+        List<List<RoundResult>> raceProgress = new ArrayList<>();
+        CarRandomMoveGenerator carRandomMoveGenerator = new CarRandomMoveGenerator();
+        List<Car> cars = findCars();
 
-            List<Map<String, Integer>> raceHistory = raceResultMapper.toRaceHistory(itemRaceResultDto.getRaceProgress());
-            List<Map<String, Integer>> itemNumbers = raceResultMapper.toRaceHistory(itemRaceResultDto.getRaceProgress());
+        for (int i = 0; i < attemptsCount.getAttemptsCount(); i++) {
+            List<RoundResult> roundResults = new ArrayList<>();
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("raceHistory", raceHistory);
-            response.put("randomNumbers", itemNumbers);
-            response.put("winners", itemRaceResultDto.getWinners());
+            for (Car car : cars) {
+                int randomNumber = carRandomMoveGenerator.generate();
+                car.move(randomNumber);
+                roundResults.add(new RoundResult(car.getName(), car.getPosition(), randomNumber));
+            }
 
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(error);
+            raceProgress.add(roundResults);
         }
+
+        return new RaceResultDto(raceProgress, findWinners(getMaxPosition(cars)));
+    }
+
+    public RaceResultDto playItemRace(GoalDistance goalDistance) {
+        List<List<RoundResult>> raceProgress = new ArrayList<>();
+
+        RandomItemGenerator randomItemGenerator = new RandomItemGenerator();
+
+        boolean goalReached = false;
+        List<Car> cars = findCars();
+
+        while (!goalReached) {
+            List<RoundResult> roundResults = new ArrayList<>();
+
+            for (Car car : cars) {
+                int randomItemNumber = randomItemGenerator.generate();
+                car.itemMove(Item.from(randomItemNumber).getEffect());
+                roundResults.add(new RoundResult(car.getName(), car.getPosition(), randomItemNumber));
+            }
+
+            raceProgress.add(roundResults);
+
+            goalReached = cars.stream().anyMatch(car -> car.getPosition() >= goalDistance.getGoalDistance());
+        }
+
+        return new RaceResultDto(raceProgress, findWinners(goalDistance.getGoalDistance()));
+    }
+
+    private List<String> findWinners(int goal) {
+        List<Car> cars = findCars();
+        List<String> winners = new ArrayList<>();
+
+        for (Car car : cars) {
+            if (car.getPosition() >= goal) {
+                winners.add(car.getName());
+            }
+        }
+
+        return winners;
+    }
+
+    public CarNamesDto getCarNames() {
+        List<String> carNames = new ArrayList<>();
+
+        for (Car car : findCars()) {
+            carNames.add(car.getName());
+        }
+
+        return new CarNamesDto(carNames);
+    }
+
+    private int getMaxPosition(List<Car> cars) {
+        return cars.stream()
+                .mapToInt(Car::getPosition)
+                .max()
+                .orElse(0);
+    }
+
+    private List<Car> findCars() {
+        return springDataJpaCarRepository.findAll();
     }
 }
