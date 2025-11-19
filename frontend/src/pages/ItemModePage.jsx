@@ -24,8 +24,9 @@ function ItemModePage() {
    * 게임 시작 핸들러
    */
   const handleStartGame = async (carNames, targetDistance) => {
-    await itemMode.startGame(carNames, targetDistance);
-    navigate('/item/race');
+      const ok = await itemMode.startGame(carNames, targetDistance);
+      if (!ok) return;
+      navigate('/item/race');
   };
 
   /**
@@ -61,8 +62,8 @@ function ItemModePage() {
   return (
     <Routes>
       {/* 아이템 모드 - 입력 화면 */}
-      <Route
-        path="/"
+      <Route 
+        path="/" 
         element={
           <ItemModeInputForm
             onStartGame={handleStartGame}
@@ -70,12 +71,12 @@ function ItemModePage() {
             onBack={handleBackToModeSelection}
             error={itemMode.error}
           />
-        }
+        } 
       />
 
       {/* 아이템 모드 - 레이싱 화면 */}
-      <Route
-        path="/race"
+      <Route 
+        path="/race" 
         element={
           itemMode.carNames.length > 0 ? (
             <ItemModeRacingScreen
@@ -88,14 +89,14 @@ function ItemModePage() {
           ) : (
             <Navigate to="/item" replace />
           )
-        }
+        } 
       />
 
       {/* 아이템 모드 - 결과 화면 */}
-      <Route
-        path="/result"
+      <Route 
+        path="/result" 
         element={
-          itemMode.winners.length > 0 ? (
+          itemMode.carNames.length > 0 ? (
             <ItemModeResultScreen
               winners={itemMode.winners}
               carNames={itemMode.carNames}
@@ -108,12 +109,12 @@ function ItemModePage() {
           ) : (
             <Navigate to="/item" replace />
           )
-        }
+        } 
       />
 
       {/* 아이템 모드 - 역대 우승자 */}
-      <Route
-        path="/history"
+      <Route 
+        path="/history" 
         element={
           <ItemModeWinnersHistoryScreen
             onBack={handleBackFromHistory}

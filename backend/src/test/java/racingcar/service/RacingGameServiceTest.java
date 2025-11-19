@@ -1,16 +1,14 @@
 package racingcar.service;
 
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import racingcar.domain.AttemptsCount;
-import racingcar.domain.Cars;
-import racingcar.domain.ClassicWinners;
-import racingcar.domain.ItemWinners;
+import racingcar.domain.*;
 import racingcar.dto.RaceResultDto;
 import racingcar.repository.SpringDataJpaCarRepository;
 import racingcar.repository.SpringDataJpaClassicWinnerRepository;
@@ -55,7 +53,7 @@ class RacingGameServiceTest {
         var carNamesDto = racingGameService.getCarNames();
 
         // then
-        assertThat(carNamesDto.getCarNames()).containsExactlyInAnyOrder("pobi", "woni", "jun");
+        Assertions.assertThat(carNamesDto.getCarNames()).containsExactlyInAnyOrder("pobi", "woni", "jun");
     }
 
     @Test
@@ -70,9 +68,25 @@ class RacingGameServiceTest {
         RaceResultDto result = racingGameService.playClassicRace(attemptsCount);
 
         // then
-        assertThat(result.getRaceProgress()).hasSize(3);
-        assertThat(result.getRaceProgress().get(0)).isNotEmpty();
-        assertThat(result.getWinners()).isNotEmpty();
+        Assertions.assertThat(result.getRaceProgress()).hasSize(3);
+        Assertions.assertThat(result.getRaceProgress().get(0)).isNotEmpty();
+        Assertions.assertThat(result.getWinners()).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("아이템 모드에서 시도 횟수만큼 경주를 진행하고 결과를 반환한다")
+    void playItemRace() {
+        // given
+        Cars cars = new Cars("pobi,woni");
+        racingGameService.saveCars(cars);
+        GoalDistance goalDistance = new GoalDistance(15);
+
+        // when
+        RaceResultDto result = racingGameService.playItemRace(goalDistance);
+
+        // then
+        Assertions.assertThat(result.getRaceProgress().get(0)).isNotEmpty();
+        Assertions.assertThat(result.getWinners()).isNotEmpty();
     }
 
     @Test
@@ -86,10 +100,10 @@ class RacingGameServiceTest {
 
         // then
         List<ClassicWinners> saved = classicWinnerRepository.findAll();
-        assertThat(saved).hasSize(1);
+        Assertions.assertThat(saved).hasSize(1);
 
         List<String> winnerNames = saved.get(0).getWinners();
-        assertThat(winnerNames).containsExactlyInAnyOrder("pobi", "woni");
+        Assertions.assertThat(winnerNames).containsExactlyInAnyOrder("pobi", "woni");
     }
 
     @Test
@@ -103,9 +117,9 @@ class RacingGameServiceTest {
 
         // then
         List<ItemWinners> saved = ItemWinnerRepository.findAll();
-        assertThat(saved).hasSize(1);
+        Assertions.assertThat(saved).hasSize(1);
 
         List<String> winnerNames = saved.get(0).getWinners();
-        assertThat(winnerNames).containsExactlyInAnyOrder("pobi", "woni");
+        Assertions.assertThat(winnerNames).containsExactlyInAnyOrder("pobi", "woni");
     }
 }
