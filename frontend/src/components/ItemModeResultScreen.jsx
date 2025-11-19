@@ -47,56 +47,58 @@ const ItemModeResultScreen = ({
               🏁 최종 순위
             </h3>
             <div className="space-y-3">
-              {carNames.map((name, index) => {
-                const position = finalPositions[index];
-                const isWinner = winners.includes(name);
-                const rank = finalPositions
-                  .slice()
-                  .sort((a, b) => b - a)
-                  .indexOf(position) + 1;
+              {carNames
+                .map((name, index) => ({ 
+                  name, 
+                  position: finalPositions[index], 
+                  isWinner: winners.includes(name) 
+                }))
+                .sort((a, b) => b.position - a.position)
+                .map(({ name, position, isWinner }) => {
+                  const rank = finalPositions.filter(p => p > position).length + 1;
 
-                return (
-                  <div
-                    key={name}
-                    className={`flex items-center justify-between p-4 rounded-xl transition-all ${
-                      isWinner
-                        ? 'bg-gradient-to-r from-yellow-200 to-yellow-100 border-2 border-yellow-400'
-                        : 'bg-gray-100'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`text-2xl font-bold ${
-                        rank === 1 ? 'text-yellow-600' :
-                        rank === 2 ? 'text-gray-500' :
-                        rank === 3 ? 'text-orange-600' :
-                        'text-gray-400'
-                      }`}>
-                        {rank === 1 && '🥇'}
-                        {rank === 2 && '🥈'}
-                        {rank === 3 && '🥉'}
-                        {rank > 3 && `${rank}위`}
-                      </div>
-                      <div>
-                        <div className={`font-bold ${isWinner ? 'text-yellow-800' : 'text-gray-800'}`}>
-                          {name}
-                          {isWinner && ' 🏆'}
+                  return (
+                    <div
+                      key={name}
+                      className={`flex items-center justify-between p-4 rounded-xl transition-all ${
+                        isWinner
+                          ? 'bg-gradient-to-r from-yellow-200 to-yellow-100 border-2 border-yellow-400'
+                          : 'bg-gray-100'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`text-2xl font-bold ${
+                          rank === 1 ? 'text-yellow-600' :
+                          rank === 2 ? 'text-gray-500' :
+                          rank === 3 ? 'text-orange-600' :
+                          'text-gray-400'
+                        }`}>
+                          {rank === 1 && '🥇'}
+                          {rank === 2 && '🥈'}
+                          {rank === 3 && '🥉'}
+                          {rank > 3 && `${rank}위`}
                         </div>
-                        <div className="text-xs text-gray-600">
-                          {position >= targetDistance ? '목표 도달!' : `${position}칸 도달`}
+                        <div>
+                          <div className={`font-bold ${isWinner ? 'text-yellow-800' : 'text-gray-800'}`}>
+                            {name}
+                            {isWinner && ' 🏆'}
+                          </div>
+                          <div className="text-xs text-gray-600">
+                            {position >= targetDistance ? '목표 도달!' : `${position}칸 도달`}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-mono text-lg font-bold text-gray-700">
+                          {position}칸
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {Math.round((position / targetDistance) * 100)}%
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-mono text-lg font-bold text-gray-700">
-                        {position}칸
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {Math.round((position / targetDistance) * 100)}%
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
           </div>
         </div>
