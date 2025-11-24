@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-@Component
 public class RandomItemGenerator implements RandomNumberGenerator {
 
     private static final int RANDOM_LOWER_INCLUSIVE = 0;
